@@ -70,3 +70,22 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+ssl:
+  enabled: true
+  clusterIssuer:
+    enabled: false  # Set to true for cluster-wide issuer
+    email: "your@email.com"
+    server: "https://acme-v02.api.letsencrypt.org/directory"
+    name: "letsencrypt-prod"
+  issuer:
+    enabled: false  # Set to true for namespace-scoped issuer
+    email: "your@email.com"
+    server: "https://acme-v02.api.letsencrypt.org/directory"
+    name: "letsencrypt"
+  dns01:
+    enabled: false  # Set to true when you have Cloudflare API token
+    cloudflareTokenSecret: "cloudflare-api-token-secret"
+    domains:
+      - "yourdomain.com"
+      - "ingress.yourdomain.com"

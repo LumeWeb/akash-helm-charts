@@ -78,3 +78,18 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
+            {{- if .Values.ssl.enabled }}
+            - name: AKASH_PROVIDER_SSL_ENABLED
+              value: "true"
+            {{- end }}
+            {{- if .Values.ssl.clusterIssuer.enabled }}
+            - name: AKASH_PROVIDER_ISSUER_TYPE
+              value: cluster-issuer
+            - name: AKASH_PROVIDER_ISSUER_NAME
+              value: {{ .Values.ssl.clusterIssuer.name }}
+            {{- else if .Values.ssl.issuer.enabled }}
+            - name: AKASH_PROVIDER_ISSUER_TYPE
+              value: issuer
+            - name: AKASH_PROVIDER_ISSUER_NAME
+              value: {{ .Values.ssl.issuer.name }}
+            {{- end }}

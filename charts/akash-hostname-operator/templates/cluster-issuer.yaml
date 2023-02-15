@@ -1,0 +1,39 @@
+{{- if and .Values.ssl.enabled (or .Values.ssl.clusterIssuer.enabled .Values.ssl.issuer.enabled) -}}
+{{- if .Values.ssl.clusterIssuer.enabled }}
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+{{- else }}
+apiVersion: cert-manager.io/v1
+kind: Issuer
+{{- end }}
+metadata:
+  name: {{ if .Values.ssl.clusterIssuer.enabled }}{{ .Values.ssl.clusterIssuer.name }}{{ else }}{{ .Values.ssl.issuer.name }}{{ end }}
+  {{- if not .Values.ssl.clusterIssuer.enabled }}
+  namespace: {{ .Release.Namespace }}
+  {{- end }}
+spec:
+  acme:
+    email: {{ if .Values.ssl.clusterIssuer.enabled }}{{ .Values.ssl.clusterIssuer.email }}{{ else }}{{ .Values.ssl.issuer.email }}{{ end }}
+    server: {{ if .Values.ssl.clusterIssuer.enabled }}{{ .Values.ssl.clusterIssuer.server }}{{ else }}{{ .Values.ssl.issuer.server }}{{ end }}
+    privateKeySecretRef:
+      name: {{ if .Values.ssl.clusterIssuer.enabled }}{{ .Values.ssl.clusterIssuer.name }}{{ else }}{{ .Values.ssl.issuer.name }}{{ end }}-issuer-account-key
+    solvers:
+      # HTTP-01 solver for regular domains
+      - http01:
+          ingress:
+            class: {{ .Values.ingress.className | default "akash-ingress-class" }}
+    {{- if .Values.ssl.dns01.enabled }}
+      # DNS-01 solver for wildcards with selector
+      - selector:
+          dnsZones:
+        {{- range .Values.ssl.dns01.domains }}
+            - {{ . | quote }}
+        {{- end }}
+        dns01:
+          cloudflare:
+            email: {{ if .Values.ssl.clusterIssuer.enabled }}{{ .Values.ssl.clusterIssuer.email }}{{ else }}{{ .Values.ssl.issuer.email }}{{ end }}
+            apiTokenSecretRef:
+              name: {{ .Values.ssl.dns01.cloudflareTokenSecret }}
+              key: api-token
+    {{- end }}
+{{- end }}
