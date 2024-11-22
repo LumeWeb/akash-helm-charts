@@ -79,7 +79,7 @@ spec:
                 fieldRef:
                   fieldPath: metadata.namespace
             {{- if .Values.ssl.enabled }}
-            - name: AP_SSL_ENABLED
+            - name: AP_SSL
               value: "true"
             {{- end }}
             {{- if .Values.ssl.clusterIssuer.enabled }}
